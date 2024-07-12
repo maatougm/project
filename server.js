@@ -1,6 +1,6 @@
 // 1 require express
 const express = require('express');
-
+const mongoose = require('mongoose');
  // 2 create instance
 const app = express();
 
@@ -9,7 +9,8 @@ const app = express();
 
   // 6connect db
 const connectDB = require("./config/connectDB");
-connectDB;
+
+connectDB();
 
 
 
@@ -27,3 +28,5 @@ const PORT = process.env.PORT;
 app.listen(PORT, (err) => {
 	err ? console.err(err) : console.log(`Server running on port ${PORT} ...`);
 });
+
+

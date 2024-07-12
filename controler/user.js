@@ -1,6 +1,64 @@
-exports.register =(req , res) => {
-    res.send("register route"); 
+//require
+const user = require("../model/user.js");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password, phone, clas, role } = req.body;
+    const foundUser = await User.findOne({ email });
+    if (foundUser) {
+      return res
+        .status(400)
+        .send({ errors: [{ msg: "email alredy used 😢" }] });
+    }
+    const saltRound = 10;
+    const hashedpass = await bcrypt.hash(password, saltRound);
+    //add newuser
+    const newUser = new User({ ...req.body });
+    newUser.password = hashedpass;
+    //save
+    await newUser.save();
+    //token
+    const token = jwt.sign(
+      {
+         id: newUser._id,
+      },
+      process.env.SECRETCKEY,
+      { expiresIn: "200h" }
+    );
+    res.status(200).send({ msg: "regestre succeeded 😊", user: newUser });
+  } catch (error) {
+    res.status(400).send({ errors: [{ msg: `eroor 😱  ${error}` }] });
+  }
 };
-exports.login =(req , res) =>{
-    res.send("login route"); 
+exports.login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    //check user
+    const foundUser = await User.findOne({ email });
+    if (!foundUser) {
+      return res
+        .status(401)
+        .send({ errors: [{ msg: "wrong Email or Password 😢" }] });
+    }
+    const checkpass = await bcrypt.compare(password, foundUser.password);
+    if (!checkpass) {
+      return res
+        .status(401)
+        .send({ errors: [{ msg: "wrong Email or Password 😢" }] });
+    }
+    //token
+    const token = jwt.sign(
+      {
+        id: foundUser._id,
+      },
+      process.env.SECRETCKEY,
+      { expiresIn: "200h" }
+    );
+    res.status(200).send({ msg: "login succeeded 😊", foundUser, token });
+  } catch (error) {
+    res.status(400).send({ errors: [{ msg: `can't login 😱 ${error}` }] });
+  }
 };

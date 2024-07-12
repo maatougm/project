@@ -6,7 +6,7 @@ const router = express.Router();
 
 //test route
 router.get("/test", (req, res) => {
-	res.send("hello world");
+	res.send("hello gingle");
 });
 
 //register

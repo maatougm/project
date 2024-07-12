@@ -6,18 +6,30 @@ const jwt = require("jsonwebtoken");
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone, clas, role } = req.body;
+    const { name, email, password, phone, clas, role,code} = req.body;
     const foundUser = await User.findOne({ email });
     if (foundUser) {
       return res
         .status(400)
         .send({ errors: [{ msg: "email alredy used 😢" }] });
     }
+    
+    //hachage pass
     const saltRound = 10;
     const hashedpass = await bcrypt.hash(password, saltRound);
     //add newuser
     const newUser = new User({ ...req.body });
     newUser.password = hashedpass;
+
+    //asigning the role and class
+    if (code.charAt(0)=="0") {
+      newUser.role="admin";
+    }  else if (code.charAt(0)=="1") {
+      newUser.role="instractor";
+    } else if (code.charAt(0)=="2")  {
+    (newUser.role="student") && (newUser.clas=code.substring(1, 3))
+    }
+
     //save
     await newUser.save();
     //token
@@ -26,7 +38,8 @@ exports.register = async (req, res) => {
          id: newUser._id,
       },
       process.env.SECRETCKEY,
-      { expiresIn: "200h" }
+      //token expire in
+      { expiresIn: process.env.JWT_EXPIRE }
     );
     res.status(200).send({ msg: "regestre succeeded 😊", user: newUser });
   } catch (error) {
@@ -50,12 +63,14 @@ exports.login = async (req, res) => {
         .send({ errors: [{ msg: "wrong Email or Password 😢" }] });
     }
     //token
+    
+
     const token = jwt.sign(
       {
         id: foundUser._id,
       },
       process.env.SECRETCKEY,
-      { expiresIn: "200h" }
+      { expiresIn: process.env.JWT_EXPIRE }
     );
     res.status(200).send({ msg: "login succeeded 😊", foundUser, token });
   } catch (error) {

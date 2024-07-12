@@ -7,12 +7,13 @@ const {Schema, model} = mongoose;
 // create schema
 const UserSchema= new Schema ({
     
-    name: { type:string , require :true },
-    email: { type:string , require :true },
-    password: { type:string , require :true },
-    phone: { type:number , require :true },
-    clas: { type:number , require :true },
-    role: {type:string , require :true },
+    name: { type:String , require :true },
+    email: { type:String , require :true },
+    password: { type:String , require :true },
+    phone: { type:Number , require :true },
+    clas: { type:String , require :false },
+    role: {type:String , require :false },
+    code:{ type:String , require :true },
 })
 
 // export
